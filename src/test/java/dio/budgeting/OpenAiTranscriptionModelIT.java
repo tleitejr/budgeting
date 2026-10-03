@@ -4,16 +4,18 @@ import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+
+import dio.budgeting.application.VoiceService;
 
 @SpringBootTest
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 public class OpenAiTranscriptionModelIT {
   @Autowired
-  OpenAiAudioTranscriptionModel transcriptionModel;
+  VoiceService voiceService;
 
   @ParameterizedTest
   @CsvSource({
@@ -24,10 +26,16 @@ public class OpenAiTranscriptionModelIT {
     "recording-5.m4a, 200 reais",
     "recording-6.m4a, 60 reais"
   })
-  void should_containExpectedKeywords_when_audioFilesAreProssed(String fileName, String expectedKeyword) {
+  void should_containExpectedKeywords_when_audioFilesAreProcessed(String fileName, String expectedKeyword) throws Exception {
     var recording = new ClassPathResource("audio/" + fileName);
+    var audio = new MockMultipartFile(
+      "file",
+      fileName,
+      "audio/mp4",
+      recording.getInputStream().readAllBytes()
+    );
 
-    var response = transcriptionModel.call(recording);
+    var response = voiceService.transcribe(audio);
 
     System.out.println(response);
     AssertionsForInterfaceTypes.assertThat(response).contains(expectedKeyword);
