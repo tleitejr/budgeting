@@ -6,19 +6,20 @@ import java.nio.file.Files;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.springframework.ai.openai.OpenAiAudioSpeechModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import dio.budgeting.application.VoiceService;
 
 @SpringBootTest
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 public class OpenAiSpeechModelIT {
   @Autowired
-  OpenAiAudioSpeechModel speechModel;
+  VoiceService voiceService;
 
   @Test
   void should_containExpectedKeywords_when_textIsProvided() throws IOException {
-    var response = speechModel.call("O valor total do serviço ficou em 80 reais. Posso confirmar o pagamento?");
+    var response = voiceService.synthesize("O valor total do serviço ficou em 80 reais. Posso confirmar o pagamento?");
 
     AssertionsForInterfaceTypes.assertThat(response).hasSizeGreaterThan(1024);
 

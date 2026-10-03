@@ -1,6 +1,6 @@
 package dio.budgeting;
 
-import org.springframework.ai.audio.tts.TextToSpeechModel;
+import dio.budgeting.application.VoiceService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api")
 public class TextToSpeechController {
-   private final TextToSpeechModel speechModel;
+   private final VoiceService voiceService;
 
-   public TextToSpeechController(TextToSpeechModel speechModel) {
-      this.speechModel = speechModel;
+   public TextToSpeechController(VoiceService voiceService) {
+      this.voiceService = voiceService;
    }
 
    record SynthesizeRequest(String text) {}
 
    @PostMapping(value = "/sinthesize", produces = "audio/mp3")
    public ResponseEntity<Resource> sinthesize(@RequestBody SynthesizeRequest request) {
-      byte[] audio = speechModel.call(request.text());
+      byte[] audio = voiceService.synthesize(request.text());
       var resource = new ByteArrayResource(audio);
 
       return ResponseEntity
